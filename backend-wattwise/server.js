@@ -15,15 +15,16 @@ app.use(cors());
 // Database connection
 require("./config/db");
 
-// // Routes (import and use later as you build features)
-// app.use("/api/auth", require("./routes/authRoutes"));
-// app.use("/api/products", require("./routes/productRoutes"));
-// app.use("/api/cart", require("./routes/cartRoutes"));
-// app.use("/api/orders", require("./routes/orderRoutes"));
+// Routes
+app.use("/api/users", require("./routes/userRoutes"));
+app.use("/api/appliances", require("./routes/applianceRoutes"));
+app.use("/api/usage", require("./routes/usageRoutes"));
+app.use("/api/forecasts", require("./routes/forecastRoutes"));
+app.use("/api/bills", require("./routes/billRoutes"));
 
 // Default route
 app.get("/", (req, res) => {
-  res.send("Backend server is running ✅");
+  res.send("Backend server is running");
 });
 
 // Server listen
