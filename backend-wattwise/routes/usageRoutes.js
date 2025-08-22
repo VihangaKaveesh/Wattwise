@@ -1,7 +1,7 @@
 // routes/usageRoutes.js
 const express = require("express");
 const router = express.Router();
-const UsageRecord = require("../models/UsageRecord");
+const UsageRecord = require("../models/UsageRecords");
 
 // Log a usage record
 router.post("/", async (req, res) => {

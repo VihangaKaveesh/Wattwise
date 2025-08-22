@@ -1,7 +1,7 @@
 // routes/applianceRoutes.js
 const express = require("express");
 const router = express.Router();
-const Appliance = require("../models/Appliance");
+const Appliance = require("../models/Appliances");
 
 // Add new appliance
 router.post("/", async (req, res) => {
