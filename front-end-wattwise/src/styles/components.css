@@ -1,0 +1,91 @@
+:root {
+  --primary: #2ecc71;       /* green */
+  --secondary: #3498db;     /* light blue */
+  --white: #ffffff;
+  --dark: #2c3e50;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--white);
+  padding: 0.8rem 1.5rem;
+  border-bottom: 2px solid #e1e1e1;
+  position: relative;
+  z-index: 10;
+}
+
+.navbar-logo a {
+  color: var(--primary);
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.navbar-links {
+  display: flex;
+  list-style: none;
+  gap: 1.2rem;
+}
+
+.navbar-links a {
+  color: var(--dark);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar-links a:hover {
+  color: var(--secondary);
+}
+
+.login-btn {
+  padding: 6px 12px;
+  background-color: var(--primary);
+  color: var(--white) !important;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+.login-btn:hover {
+  background-color: var(--secondary);
+}
+
+.menu-icon {
+  display: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: var(--dark);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .navbar-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--white);
+    flex-direction: column;
+    width: 100%;
+    display: none;
+    border-top: 1px solid #ddd;
+  }
+
+  #menu-toggle:checked + .menu-icon + .navbar-links {
+    display: flex;
+  }
+
+  .menu-icon {
+    display: block;
+  }
+}
+
+#menu-toggle {
+  display: none;
+}
