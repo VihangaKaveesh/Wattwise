@@ -1,0 +1,13 @@
+month,month_name,avg_temp_c,rainy_days
+1,Jan,27.0,6
+2,Feb,27.2,5
+3,Mar,28.0,8
+4,Apr,28.5,14
+5,May,28.3,15
+6,Jun,27.8,13
+7,Jul,27.5,10
+8,Aug,27.5,10
+9,Sep,27.5,12
+10,Oct,27.0,16
+11,Nov,27.0,15
+12,Dec,26.8,10
