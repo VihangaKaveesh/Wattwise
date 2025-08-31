@@ -1,11 +1,11 @@
-// models/Forecast.js
 const mongoose = require("mongoose");
 
 const forecastSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  forecastDate: { type: Date, default: Date.now },
+  month: { type: Number, required: true },
+  year: { type: Number, required: true },
   predictedConsumption: { type: Number, required: true }, // in kWh
-  modelVersion: { type: String, default: "svm-v1" },
+  predictedAmount: { type: Number, required: true }       // in LKR
 }, { timestamps: true });
 
 module.exports = mongoose.model("Forecast", forecastSchema);
