@@ -6,24 +6,24 @@ const Appliance = require("../models/Appliances");
 // Add new appliance
 router.post("/", async (req, res) => {
   try {
-    const { user, name, type, powerRating, category } = req.body;
-    const appliance = new Appliance({ user, name, type, powerRating, category });
-    await appliance.save();
-    res.status(201).json({ message: "Appliance added", appliance });
+    const rows = Array.isArray(req.body) ? req.body : [req.body];
+    const inserted = await Appliance.insertMany(rows);
+    res.status(201).json({ message: "Appliances added", count: inserted.length });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get all appliances
+// GET /appliances — Get all appliances
 router.get("/", async (req, res) => {
   try {
-    const appliances = await Appliance.find().populate("user", "name email");
+    const appliances = await Appliance.find();
     res.json(appliances);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Get appliances for a specific user
 router.get("/user/:userId", async (req, res) => {
