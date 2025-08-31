@@ -21,6 +21,7 @@ app.use("/api/appliances", require("./routes/applianceRoutes"));
 app.use("/api/usage", require("./routes/usageRoutes"));
 app.use("/api/forecasts", require("./routes/forecastRoutes"));
 app.use("/api/bills", require("./routes/billRoutes"));
+app.use("/api/python", require("./routes/python"));
 
 // Default route
 app.get("/", (req, res) => {
