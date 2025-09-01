@@ -50,4 +50,14 @@ router.post("/appliances", async (req, res) => {
   }
 });
 
+// GET /datasets/tariffs
+router.get("/tariffs", async (req, res) => {
+    try {
+      const tariffs = await Tariff.find({}, { _id: 0 });
+      res.json(tariffs);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
 module.exports = router;
