@@ -1,151 +1,129 @@
+# energy_predictor_service.py
+
+import json
+import joblib
+import numpy as np
+import pandas as pd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os
-import pandas as pd
-import joblib
-from pymongo import MongoClient
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, 'ml-models', 'rf_energy_model.pkl')
-energy_model = joblib.load(MODEL_PATH)
 
-mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/WattWise")
-client = MongoClient(mongo_uri)
-db = client.get_default_database()
-appliance_collection = db["appliances"]
-monthly_collection = db["monthlydatas"]
-tariff_collection = db["tariffs"]
+# ----------------- Load model and artifacts -----------------
+MODEL_PATH = "./ml-models/rf_energy_model.pkl"
+DEFAULT_HOURS_PATH = "./datasets/median_daily_hours_per_appliance .json"
 
-def load_appliance_table():
-    table = {}
-    for doc in appliance_collection.find({}, {"name": 1, "typical_w": 1, "standby_w": 1, "_id": 0}):
-        table[doc["name"]] = {
-            "typical_w": max(doc["typical_w"], 0),
-            "standby_w": max(doc.get("standby_w", 0), 0)
-        }
-    return table
+# Load model
+model = joblib.load(MODEL_PATH)
 
-default_daily_hours = {app: 1 for app in load_appliance_table().keys()}
+# Load default daily hours
+with open(DEFAULT_HOURS_PATH, "r") as f:
+    default_daily_hours = json.load(f)
 
-def get_monthly_context(month):
-    doc = monthly_collection.find_one({"month": month}, {"_id": 0})
-    return {
-        "rainy_days": max(doc.get("rainy_days", 8), 0),
-        "public_holidays": max(doc.get("public_holidays", 1), 0)
-    } if doc else {"rainy_days": 8, "public_holidays": 1}
+# Load supporting reference tables
+appliances_df = pd.read_csv("./datasets/appliances_sl.csv")
+weather_df = pd.read_csv("./datasets/weather_monthly_sl.csv")
+holidays_df = pd.read_csv("./datasets/holidays_2025_monthly.csv")
 
-def fetch_tariff_slabs(kwh):
-    scheme = "<=60" if kwh <= 60 else ">60"
-    slabs = list(tariff_collection.find({"scheme": scheme}, {"_id": 0}))
-    return sorted(slabs, key=lambda s: s["kwh_from"])
+appl_table = appliances_df.set_index("appliance").to_dict(orient="index")
+weather_map = weather_df.set_index("month").to_dict(orient="index")
+holidays_map = holidays_df.set_index("month").to_dict(orient="index")
 
-def compute_bill_lkr(kwh):
-    slabs = fetch_tariff_slabs(kwh)
-    bill = 0
-    remaining = max(kwh, 0)
-
-    for slab in slabs:
-        from_kwh = slab["kwh_from"]
-        to_kwh = slab.get("kwh_to", float("inf"))
-        rate = slab["energy_lkr_per_kwh"]
-        fixed = slab["fixed_lkr"]
-
-        if remaining <= 0:
-            break
-
-        slab_range = (to_kwh - from_kwh) if to_kwh != float("inf") else remaining
-        slab_units = min(remaining, slab_range)
-
-        if slab_units > 0:
-            bill += slab_units * rate
-            bill += fixed  # Only add fixed charge if this slab is used
-
-        remaining -= slab_units
-
-    return round(bill, 2)
-
+# Make sure FEATURE_COLS matches your training
 FEATURE_COLS = [
-    'people',
-    'num_appliances',
-    'physics_kwh',
-    'sum_monthly_hours_appliances',
-    'month',
-    'rainy_days',
-    'public_holidays'
+    "people",
+    "num_appliances",
+    "physics_kwh",
+    "sum_monthly_hours_appliances",
+    "month",
+    "rainy_days",
+    "public_holidays"
 ]
 
-def build_features_from_input(user_input: dict, month_override: int = None):
-    appl_table = load_appliance_table()
-    people = max(int(user_input.get('people', 1)), 1)
-    month = int(month_override) if month_override else int(user_input.get('month', 1))
-    appliances = user_input.get('appliances', [])
-    hours_per_day = user_input.get('hours_per_day', {})
+# ----------------- Utility Functions -----------------
+def compute_bill_lkr(kwh: float) -> float:
+    """Example tariff function (you can replace with actual slabs)."""
+    rate = 28.0  # LKR per kWh placeholder
+    return kwh * rate
 
-    monthly_power_time_wh = 0
-    monthly_standby_wh = 0
-    sum_monthly_hours = 0
+
+def build_feature_from_input(user_input: dict, month_override: int = None):
+    people = int(user_input.get("people", 1))
+    month = int(month_override) if month_override is not None else int(user_input.get("month", 1))
+    appliances = list(user_input.get("appliances", []))
+    hours_per_day = user_input.get("hours_per_day", {})
+
+    monthly_power_time_wh = 0.0
+    monthly_standby_wh = 0.0
+    sum_monthly_hours = 0.0
 
     for app in appliances:
         if app not in appl_table:
+            print(f"Warning: appliance '{app}' not in appliance table — skipping")
             continue
-        typ = max(appl_table[app]['typical_w'], 0)
-        standby = max(appl_table[app].get('standby_w', 0), 0)
-        hpd = max(float(hours_per_day.get(app, default_daily_hours.get(app, 1))), 0)
-        monthly_hours = hpd * 30
+        typ = float(appl_table[app]["typical_w"])
+        standby = float(appl_table[app].get("standby_w", 0.0))
+        hpd = float(hours_per_day.get(app, default_daily_hours.get(app, 0.5)))
+        monthly_hours = hpd * 30.0
         monthly_power_time_wh += typ * monthly_hours
-        monthly_standby_wh += standby * 30 * 24
+        monthly_standby_wh += standby * 30.0 * 24.0
         sum_monthly_hours += monthly_hours
 
-    physics_kwh = max((monthly_power_time_wh + monthly_standby_wh) / 1000, 0)
-    num_appliances = max(len(appliances), 0)
-    context = get_monthly_context(month)
+    physics_kwh = (monthly_power_time_wh + monthly_standby_wh) / 1000.0
+    num_appliances = len(appliances)
+
+    rainy_days = int(weather_map.get(month, {}).get("rainy_days", 8))
+    public_holidays = int(holidays_map.get(month, {}).get("public_holidays", 1))
 
     return {
-        'people': people,
-        'num_appliances': num_appliances,
-        'physics_kwh': physics_kwh,
-        'sum_monthly_hours_appliances': sum_monthly_hours,
-        'month': month,
-        'rainy_days': context["rainy_days"],
-        'public_holidays': context["public_holidays"]
+        "people": people,
+        "num_appliances": num_appliances,
+        "physics_kwh": physics_kwh,
+        "sum_monthly_hours_appliances": sum_monthly_hours,
+        "month": month,
+        "rainy_days": rainy_days,
+        "public_holidays": public_holidays,
     }
 
-@app.route('/predict-usage', methods=['POST'])
+
+def predict_for_user(user_input: dict, month_override: int = None):
+    feat = build_feature_from_input(user_input, month_override=month_override)
+    Xrow = pd.DataFrame([feat])[FEATURE_COLS]
+    predicted_kwh = float(model.predict(Xrow)[0])
+    predicted_kwh = max(0.0, predicted_kwh)
+    predicted_bill = compute_bill_lkr(predicted_kwh)
+    return {
+        "predicted_kwh": float(np.round(predicted_kwh, 3)),
+        "predicted_bill_lkr": float(np.round(predicted_bill, 2))
+    }
+
+# ----------------- Flask App -----------------
+
+@app.route("/predict-usage", methods=["POST"])
 def predict_usage():
-    data = request.get_json()
     try:
-        features_this_month = build_features_from_input(data)
-        features_next_month = build_features_from_input(data, month_override=(data.get('month', 1) % 12) + 1)
+        user_input = request.get_json(force=True)
 
-        for col in FEATURE_COLS:
-            if features_this_month[col] < 0 or features_next_month[col] < 0:
-                raise ValueError(f"Invalid feature: {col} is negative")
+        this_month = predict_for_user(user_input, month_override=user_input.get("month"))
+        next_month = predict_for_user(
+            user_input,
+            month_override=(int(user_input.get("month", 1)) % 12) + 1
+        )
 
-        X_this = pd.DataFrame([features_this_month])[FEATURE_COLS]
-        X_next = pd.DataFrame([features_next_month])[FEATURE_COLS]
-
-        predicted_kwh_this = max(float(energy_model.predict(X_this)[0]), 0)
-        predicted_kwh_next = max(float(energy_model.predict(X_next)[0]), 0)
-
-        predicted_bill_this = compute_bill_lkr(predicted_kwh_this)
-        predicted_bill_next = compute_bill_lkr(predicted_kwh_next)
+        return jsonify({
+            "this_month": this_month,
+            "next_month": next_month
+        })
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({
+            "this_month": {"predicted_kwh": 0, "predicted_bill_lkr": 0},
+            "next_month": {"predicted_kwh": 0, "predicted_bill_lkr": 0},
+            "error": str(e)
+        }), 400
 
-    return jsonify({
-        "this_month": {
-            "predicted_kwh": round(predicted_kwh_this, 3),
-            "predicted_bill_lkr": round(predicted_bill_this, 2)
-        },
-        "next_month": {
-            "predicted_kwh": round(predicted_kwh_next, 3),
-            "predicted_bill_lkr": round(predicted_bill_next, 2)
-        }
-    })
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(port=5002, debug=True)
