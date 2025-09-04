@@ -1,0 +1,127 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './styles/ApplianceEntry.css';
+import { useLocation } from 'react-router-dom';
+
+// Mock appliance list - fetch from backend in real app
+const AVAILABLE_APPLIANCES = [
+  "Ceiling Fan", "Refrigerator (200–300L)", "LED TV (40–50 in)",
+  "Rice Cooker", "Electric Kettle", "Washing Machine (6-8kg)",
+  "Laptop", "Desktop Computer", "Incandescent Bulb (60W)", "LED Bulb (9W)"
+];
+
+// City options
+const CITY_OPTIONS = [
+  "Colombo", "Mount Lavinia", "Kesbewa", "Maharagama", "Moratuwa", "Ratnapura",
+  "Negombo", "Kandy", "Sri Jayewardenepura Kotte", "Kalmunai", "Trincomalee",
+  "Galle", "Jaffna", "Athurugiriya", "Weligama", "Matara", "Kolonnawa",
+  "Gampaha", "Puttalam", "Badulla", "Kalutara", "Bentota", "Mannar", "Kurunegala"
+];
+
+export default function ApplianceEntry() {
+  const [location, setLocation] = useState('');
+  const [selectedAppliances, setSelectedAppliances] = useState({});
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const locationObj = useLocation();
+  const { userId, token } = locationObj.state || {};
+
+  // Fetch existing user appliances on mount
+  useEffect(() => {
+    const fetchAppliances = async () => {
+      try {
+        const res = await axios.get(`/api/user-appliances/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setLocation(res.data.location);
+        const appliances = {};
+        res.data.appliances.forEach(a => {
+          appliances[a.name] = true;
+        });
+        setSelectedAppliances(appliances);
+      } catch (err) {
+        console.log('No existing appliances found or error:', err);
+      }
+    };
+    fetchAppliances();
+  }, [userId, token]);
+
+  const handleApplianceChange = (appliance) => {
+    setSelectedAppliances(prev => {
+      const newSelection = { ...prev };
+      if (newSelection[appliance]) delete newSelection[appliance];
+      else newSelection[appliance] = true;
+      return newSelection;
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    setError('');
+
+    const payload = {
+      location,
+      appliances: Object.keys(selectedAppliances).map(name => ({ name }))
+    };
+
+    try {
+      await axios.post(`http://localhost:5000/api/user-appliances/${userId}`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessage('Appliances saved successfully!');
+    } catch (err) {
+      setError('Failed to save appliances.');
+      console.error(err);
+    }
+  };
+
+
+  return (
+    <div className="appliance-entry-page">
+      <div className="appliance-entry-container">
+        <h1>My Appliances</h1>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-section">
+            <label htmlFor="location">Location:</label>
+            <select
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              required
+            >
+              <option value="">Select your city</option>
+              {CITY_OPTIONS.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-section">
+            <label>Select Appliances:</label>
+            <div className="appliances-grid">
+              {AVAILABLE_APPLIANCES.map(a => (
+                <div key={a} className="appliance-item">
+                  <input
+                    type="checkbox"
+                    id={a}
+                    checked={!!selectedAppliances[a]}
+                    onChange={() => handleApplianceChange(a)}
+                  />
+                  <label htmlFor={a}>{a}</label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button type="submit">Save Appliances</button>
+          
+        </form>
+
+        {message && <div className="success-message">{message}</div>}
+        {error && <div className="error-message">{error}</div>}
+      </div>
+    </div>
+  );
+}

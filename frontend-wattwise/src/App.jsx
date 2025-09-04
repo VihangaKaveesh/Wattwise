@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LoginPage from '../pages/auth/LoginPage.jsx';
 import RegisterPage from '../pages/auth/RegisterPage.jsx';
 import UsageQuestionnaire from '../pages/user/dashboard/UsageQuestionnaire.jsx';
+import ApplianceEntry from '../pages/user/dashboard/ApplianceEntry.jsx';
 
 // Placeholder components for dashboards
 const UserDashboard = () => <div>User Dashboard</div>;
@@ -18,6 +19,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/usage-questionnaire" element={<UsageQuestionnaire />} />
+        <Route path="/appliance-entry" element={<ApplianceEntry />} />
         
         {/* Later, you will protect these routes */}
         <Route path="/dashboard" element={<UserDashboard />} />

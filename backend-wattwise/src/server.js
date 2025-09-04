@@ -23,7 +23,8 @@ app.use("/api/forecasts", require("./routes/forecastRoutes"));
 app.use("/api/bills", require("./routes/billRoutes"));
 app.use("/api/python", require("./routes/python"));
 app.use("/datasets", require("./routes/datasetRoutes"));
-app.use("/api/reports", require("./routes/usageRoutes")); 
+app.use("/api/reports", require("./routes/usageRoutes"));
+app.use("/api/user-appliances", require("./routes/UserApplianceRoutes")); 
 
 // Default route
 app.get("/", (req, res) => {
