@@ -11,7 +11,7 @@ export default function UserDashboard() {
   const locationObj = useLocation();
   const { state } = locationObj;
 
-  const { user } = useContext(AuthContext); // <-- get JWT and userId from context
+  const { user } = useContext(AuthContext); 
   const userId = user?.userId || state?.userId;
   const token = user?.token || state?.token;
 
@@ -24,37 +24,42 @@ export default function UserDashboard() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        // Get user appliances
+        // 1️⃣ Get user appliances
         const appliancesRes = await axios.get(`http://localhost:5000/api/user-appliances/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setAppliances(appliancesRes.data.appliances || []);
 
-        // Get user forecasts
+        // 2️⃣ Get user forecasts
         const forecastRes = await axios.get(`http://localhost:5000/api/forecasts/user/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setForecasts(forecastRes.data || []);
-        if (forecastRes.data.length > 0) {
-          const sorted = [...forecastRes.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          setLatestPrediction(sorted[0]);
+        const sortedForecasts = [...forecastRes.data].sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+        setForecasts(sortedForecasts);
+
+        if (sortedForecasts.length > 0) {
+          setLatestPrediction(sortedForecasts[sortedForecasts.length - 1]);
         }
 
-        // Get user recommendations
+        // 3️⃣ Get user recommendations
         const recRes = await axios.get(`http://localhost:5000/api/user-recommendations/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setRecommendations(recRes.data);
+
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
       } finally {
         setLoading(false);
       }
     };
+
     if (userId && token) fetchDashboard();
   }, [userId, token]);
 
-  // Prepare chart data
+  // Chart data for all forecasts over time
   const chartData = forecasts.map(f => ({
     month: `${f.month}/${f.year}`,
     kWh: f.predictions?.this_month?.predicted_kwh || 0,
@@ -64,20 +69,21 @@ export default function UserDashboard() {
   if (loading) return <div className="loading">Loading dashboard...</div>;
 
   return (
-    <div className="dashboard-page container">  
-      {/* Chart */}
-      <div className="chart">
+    <div className="dashboard-page">
+
+      {/* Usage & Bill Chart */}
+      <div className="chart-section dashboard-card">
         <h2>Usage & Bill Over Time</h2>
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height="80%">
             <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" />
+              <YAxis yAxisId="left" label={{ value: 'kWh', angle: -90, position: 'insideLeft' }} />
+              <YAxis yAxisId="right" orientation="right" label={{ value: 'LKR', angle: -90, position: 'insideRight' }} />
               <Tooltip />
               <Legend />
-              <Line yAxisId="left" dataKey="kWh" stroke="#8884d8" />
+              <Line yAxisId="left" dataKey="kWh" stroke="#8884d8" activeDot={{ r: 6 }} />
               <Line yAxisId="right" dataKey="bill" stroke="#82ca9d" />
             </LineChart>
           </ResponsiveContainer>
@@ -87,20 +93,29 @@ export default function UserDashboard() {
       </div>
 
       {/* Latest Prediction */}
-      <div className="prediction">
-        <h2>Latest Prediction</h2>
-        {latestPrediction ? (
-          <div className="prediction-details">
-            <p><strong>This Month:</strong> {latestPrediction.predictions?.this_month?.predicted_kwh || 0} kWh | LKR {latestPrediction.predictions?.this_month?.predicted_bill_lkr || 0}</p>
-            <p><strong>Next Month:</strong> {latestPrediction.predictions?.next_month?.predicted_kwh || 0} kWh | LKR {latestPrediction.predictions?.next_month?.predicted_bill_lkr || 0}</p>
-          </div>
-        ) : (
-          <p>No prediction available.</p>
-        )}
+<div className="predictions-section dashboard-card">
+  <h2>Latest Prediction</h2>
+  {latestPrediction ? (
+    <div className="prediction-cards">
+      <div className="prediction-card">
+        <h3>This Month</h3>
+        <p className="kwh">{latestPrediction.predictions?.this_month?.predicted_kwh || 0} kWh</p>
+        <p className="bill">LKR {latestPrediction.predictions?.this_month?.predicted_bill_lkr || 0}</p>
       </div>
+      <div className="prediction-card">
+        <h3>Next Month</h3>
+        <p className="kwh">{latestPrediction.predictions?.next_month?.predicted_kwh || 0} kWh</p>
+        <p className="bill">LKR {latestPrediction.predictions?.next_month?.predicted_bill_lkr || 0}</p>
+      </div>
+    </div>
+  ) : (
+    <p>No prediction available.</p>
+  )}
+</div>
+
 
       {/* Appliances */}
-      <div className="appliances">
+      <div className="appliances-section dashboard-card">
         <h2>Your Appliances</h2>
         {appliances.length > 0 ? (
           <div className="appliance-cards">
@@ -116,14 +131,14 @@ export default function UserDashboard() {
       </div>
 
       {/* Recommendations */}
-      <div className="recommendation">
+      <div className="recommendations-section dashboard-card">
         <h2>Your Latest Recommendations</h2>
-        {recommendations?.appliances && recommendations.appliances.length > 0 ? (
+        {recommendations?.recommended_hours_per_day ? (
           <div className="recommendation-cards">
-            {recommendations.appliances.map((item, idx) => (
+            {Object.entries(recommendations.recommended_hours_per_day).map(([appliance, hours], idx) => (
               <div key={idx} className="recommendation-card">
-                <p>{item.name}</p>
-                <h3>{item.recommended_hours_per_day || 'N/A'} hrs/day</h3>
+                <p>{appliance}</p>
+                <h3>{hours} hrs/day</h3>
               </div>
             ))}
           </div>

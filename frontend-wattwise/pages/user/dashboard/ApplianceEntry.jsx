@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import './styles/ApplianceEntry.css';
 import { useLocation, useNavigate } from 'react-router-dom';
+import AuthContext from '../../../src/context/authcontext.jsx'; // <-- Import AuthContext
 
 const AVAILABLE_APPLIANCES = [
   "Ceiling Fan", "Pedestal Fan", "Refrigerator (200–300L)",
@@ -21,7 +22,12 @@ const CITY_OPTIONS = [
 export default function ApplianceEntry() {
   const navigate = useNavigate();
   const locationObj = useLocation();
-  const { userId, token } = locationObj.state || {};
+  const { state } = locationObj;
+
+  // <-- Get userId and token from AuthContext first
+  const { user } = useContext(AuthContext);
+  const userId = user?.userId || state?.userId;
+  const token = user?.token || state?.token;
 
   const [location, setLocation] = useState('');
   const [selectedAppliances, setSelectedAppliances] = useState({});

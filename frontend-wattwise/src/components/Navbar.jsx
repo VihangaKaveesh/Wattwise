@@ -26,13 +26,13 @@ export default function Navbar() {
               <NavLink to="/dashboard">Dashboard</NavLink>
             </li>
             <li>
-              <NavLink to="/profile">Profile</NavLink>
-            </li>
-            <li>
               <NavLink to="/budget-setup">Budget Setup</NavLink>
             </li>
             <li>
               <NavLink to="/usage-questionnaire">Usage Questionnaire</NavLink>
+            </li>
+            <li>
+              <NavLink to="/profile">Profile</NavLink>
             </li>
           </>
         )}
