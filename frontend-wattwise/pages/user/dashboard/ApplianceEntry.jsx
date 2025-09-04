@@ -1,32 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './styles/ApplianceEntry.css';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-// Mock appliance list - fetch from backend in real app
 const AVAILABLE_APPLIANCES = [
-  "Ceiling Fan",
-  "Pedestal Fan",
-  "Refrigerator (200–300L)",
-  "Inverter AC (9000–12000 BTU)",
-  "Non-inverter AC (12000 BTU)",
-  "LED TV (40–50 in)",
-  "Laptop",
-  "Desktop PC",
-  "Washing Machine (Front-load)",
-  "Rice Cooker",
-  "Electric Kettle",
-  "Microwave Oven",
-  "Iron",
-  "Water Pump",
-  "Incandescent Bulb",
-  "LED Bulb",
-  "Water Heater (Instant)",
-  "Blender"
+  "Ceiling Fan", "Pedestal Fan", "Refrigerator (200–300L)",
+  "Inverter AC (9000–12000 BTU)", "Non-inverter AC (12000 BTU)",
+  "LED TV (40–50 in)", "Laptop", "Desktop PC", "Washing Machine (Front-load)",
+  "Rice Cooker", "Electric Kettle", "Microwave Oven", "Iron", "Water Pump",
+  "Incandescent Bulb", "LED Bulb", "Water Heater (Instant)", "Blender"
 ];
 
-
-// City options
 const CITY_OPTIONS = [
   "Colombo", "Mount Lavinia", "Kesbewa", "Maharagama", "Moratuwa", "Ratnapura",
   "Negombo", "Kandy", "Sri Jayewardenepura Kotte", "Kalmunai", "Trincomalee",
@@ -35,18 +19,18 @@ const CITY_OPTIONS = [
 ];
 
 export default function ApplianceEntry() {
-  const [location, setLocation] = useState('');
-  const [selectedAppliances, setSelectedAppliances] = useState({});
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
   const locationObj = useLocation();
   const { userId, token } = locationObj.state || {};
 
-  // Fetch existing user appliances on mount
+  const [location, setLocation] = useState('');
+  const [selectedAppliances, setSelectedAppliances] = useState({});
+  const [error, setError] = useState('');
+
   useEffect(() => {
     const fetchAppliances = async () => {
       try {
-        const res = await axios.get(`/api/user-appliances/${userId}`, {
+        const res = await axios.get(`http://localhost:5000/api/user-appliances/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setLocation(res.data.location);
@@ -56,10 +40,10 @@ export default function ApplianceEntry() {
         });
         setSelectedAppliances(appliances);
       } catch (err) {
-        console.log('No existing appliances found or error:', err);
+        console.log('No existing appliances found or error:', err.response?.data || err.message);
       }
     };
-    fetchAppliances();
+    if (userId && token) fetchAppliances();
   }, [userId, token]);
 
   const handleApplianceChange = (appliance) => {
@@ -73,7 +57,6 @@ export default function ApplianceEntry() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
     setError('');
 
     const payload = {
@@ -85,13 +68,17 @@ export default function ApplianceEntry() {
       await axios.post(`http://localhost:5000/api/user-appliances/${userId}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessage('Appliances saved successfully!');
+
+      // ✅ Show success alert
+      alert('Appliances saved successfully!');
+
+      // ✅ Redirect back to profile with userId & token
+      navigate('/profile', { state: { userId, token } });
     } catch (err) {
       setError('Failed to save appliances.');
       console.error(err);
     }
   };
-
 
   return (
     <div className="appliance-entry-page">
@@ -132,10 +119,8 @@ export default function ApplianceEntry() {
           </div>
 
           <button type="submit">Save Appliances</button>
-          
         </form>
 
-        {message && <div className="success-message">{message}</div>}
         {error && <div className="error-message">{error}</div>}
       </div>
     </div>

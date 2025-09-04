@@ -1,0 +1,135 @@
+/* General Layout */
+.profile-page {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  background: #f3f4f6;
+  min-height: 100vh;
+}
+
+.profile-container {
+  width: 100%;
+  max-width: 800px;
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* User Info */
+.user-info {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.user-info h2 {
+  font-size: 2rem;
+  color: #111827;
+  margin-bottom: 0.4rem;
+}
+
+.user-info p {
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* Appliances Section */
+.appliances-section {
+  margin-top: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-header h3 {
+  font-size: 1.4rem;
+  color: #1f2937;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+/* Appliances Grid */
+.appliances-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1.2rem;
+}
+
+.appliance-card {
+  padding: 1.2rem;
+  background: #f9fafb;
+  border-radius: 0.8rem;
+  text-align: center;
+  font-weight: 500;
+  color: #374151;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.appliance-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Empty State */
+.no-appliances {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 1rem;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.add-btn {
+  margin-top: 1rem;
+  padding: 0.6rem 1.4rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.8rem;
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.add-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #4338ca, #2563eb);
+}
+
+/* Loading and Error States */
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #4b5563;
+  padding: 2rem;
+}
+
+.error-message {
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 0.8rem 1rem;
+  border-radius: 0.6rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}

@@ -49,10 +49,14 @@ router.get("/:userId", async (req, res) => {
   try {
     const record = await UserAppliance.findOne({ userId: req.params.userId });
 
-    if (!record) {
-      return res.status(404).json({ error: "No appliances found for this user" });
+     if (!record) {
+      // ✅ Instead of error → return an empty list
+      return res.json({
+        userId: req.params.userId,
+        appliances: [],
+        message: "No appliances added for this user yet."
+      });
     }
-
     res.json({
       userId: record.userId,
       location: record.location,
