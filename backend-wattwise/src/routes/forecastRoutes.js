@@ -1,4 +1,3 @@
-// routes/forecastRoutes.js
 const express = require("express");
 const router = express.Router();
 const Forecast = require("../models/Forecast");
@@ -6,8 +5,16 @@ const Forecast = require("../models/Forecast");
 // Add a new forecast
 router.post("/", async (req, res) => {
   try {
-    const { user, forecastDate, predictedConsumption, modelVersion } = req.body;
-    const forecast = new Forecast({ user, forecastDate, predictedConsumption, modelVersion });
+    const { user, month, year, predictions, modelVersion } = req.body;
+
+    const forecast = new Forecast({
+      user,
+      month,
+      year,
+      predictions,
+      modelVersion
+    });
+
     await forecast.save();
     res.status(201).json({ message: "Forecast added", forecast });
   } catch (error) {

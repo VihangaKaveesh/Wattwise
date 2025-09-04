@@ -30,7 +30,7 @@ export default function BudgetSetup() {
     fetchAppliances();
   }, [userId, token]);
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     if (!budget || appliances.length === 0) return;
 
@@ -41,16 +41,29 @@ export default function BudgetSetup() {
     const month = new Date().getMonth() + 1; // current month
 
     try {
+      // 1️⃣ Get recommendations from Python service
       const res = await axios.post('http://localhost:5001/recommend-budget', {
         budget_lkr: parseFloat(budget),
         people,
         month,
         appliances: appliances.map(a => a.name),
       });
-      setRecommendations(res.data.recommended_hours_per_day);
+
+      const recommendedHours = res.data.recommended_hours_per_day;
+      setRecommendations(recommendedHours);
+
+      // 2️⃣ Send recommendations to Node.js backend
+      await axios.post('http://localhost:5000/api/user-recommendations', {
+        user: userId,
+        recommended_hours_per_day: recommendedHours
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+
     } catch (err) {
-      console.error('Error fetching recommendations:', err);
-      setError('Failed to fetch budget recommendations.');
+      console.error('Error fetching recommendations or saving:', err);
+      setError('Failed to fetch or save recommendations.');
     }
 
     setLoading(false);

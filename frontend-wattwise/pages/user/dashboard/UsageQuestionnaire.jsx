@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios'; // Using axios directly for the Python service
 import './styles/UsageQuestionnaire.css';
+import { useLocation } from 'react-router-dom';
 
 // Mock appliance list - in a real app, fetch this from your Node.js backend
 // For example: GET /api/appliances
@@ -18,6 +19,8 @@ export default function UsageQuestionnaire() {
   const [prediction, setPrediction] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+   const location = useLocation();
+  const { userId } = location.state || {};
 
   const handleApplianceChange = (appliance) => {
     setSelectedAppliances(prev => {
@@ -40,37 +43,49 @@ export default function UsageQuestionnaire() {
     }));
   };
 
-  // Submit the survey and get prediction
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setPrediction(null);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
+  setPrediction(null);
 
-    // Prepare payload for Python service
-    const payload = {
-      people: parseInt(people, 10),
-      month: new Date().getMonth() + 1, // Current month
-      appliances: Object.keys(selectedAppliances),
-      hours_per_day: Object.entries(selectedAppliances).reduce((acc, [name, data]) => {
-        acc[name] = data.usage;
-        return acc;
-      }, {})
+  // Prepare payload for Python service
+  const payload = {
+    people: parseInt(people, 10),
+    month: new Date().getMonth() + 1,
+    appliances: Object.keys(selectedAppliances),
+    hours_per_day: Object.entries(selectedAppliances).reduce((acc, [name, data]) => {
+      acc[name] = data.usage;
+      return acc;
+    }, {})
+  };
+
+  try {
+    // 1️⃣ Call the Python Flask API
+    const response = await axios.post('http://localhost:5002/predict-usage', payload);
+    setPrediction(response.data);
+
+    // 2️⃣ Prepare payload for Node.js backend (MongoDB)
+    const forecastPayload = {
+      user: userId,
+      month: new Date().getMonth() + 1,
+      year: new Date().getFullYear(),
+      predictions: response.data,
+      modelVersion: "v1.0"
     };
 
-    try {
-      // Call the Python Flask API
-      const response = await axios.post('http://localhost:5002/predict-usage', payload);
-      setPrediction(response.data);
-      // Here you would also save the survey to your Node.js backend
-      // await api.post('/usage/survey', { ... });
-    } catch (err) {
-      setError('Failed to get prediction. Please try again.');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // 3️⃣ Send to Node.js backend
+    await axios.post('http://localhost:5000/api/forecast', forecastPayload);
+
+  } catch (err) {
+    setError('Failed to get prediction or save forecast. Please try again.');
+    console.error(err);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
 
   // Render the form and results
   return (
