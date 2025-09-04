@@ -40,7 +40,7 @@ export default function LoginPage() {
     if (userData.role === 'admin') {
       navigate('/admin/dashboard', { state: { userId, token: userData.token } });
     } else {
-     navigate('/appliance-entry', { state: { userId: userData._id, token: userData.token } });
+     navigate('/budget-setup', { state: { userId: userData._id, token: userData.token } });
     }
 
   } catch (err) {

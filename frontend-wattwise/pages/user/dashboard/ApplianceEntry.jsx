@@ -5,10 +5,26 @@ import { useLocation } from 'react-router-dom';
 
 // Mock appliance list - fetch from backend in real app
 const AVAILABLE_APPLIANCES = [
-  "Ceiling Fan", "Refrigerator (200–300L)", "LED TV (40–50 in)",
-  "Rice Cooker", "Electric Kettle", "Washing Machine (6-8kg)",
-  "Laptop", "Desktop Computer", "Incandescent Bulb (60W)", "LED Bulb (9W)"
+  "Ceiling Fan",
+  "Pedestal Fan",
+  "Refrigerator (200–300L)",
+  "Inverter AC (9000–12000 BTU)",
+  "Non-inverter AC (12000 BTU)",
+  "LED TV (40–50 in)",
+  "Laptop",
+  "Desktop PC",
+  "Washing Machine (Front-load)",
+  "Rice Cooker",
+  "Electric Kettle",
+  "Microwave Oven",
+  "Iron",
+  "Water Pump",
+  "Incandescent Bulb",
+  "LED Bulb",
+  "Water Heater (Instant)",
+  "Blender"
 ];
+
 
 // City options
 const CITY_OPTIONS = [
