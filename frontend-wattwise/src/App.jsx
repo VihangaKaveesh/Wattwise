@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Import your page components
@@ -8,14 +7,18 @@ import UsageQuestionnaire from '../pages/user/dashboard/UsageQuestionnaire.jsx';
 import ApplianceEntry from '../pages/user/dashboard/ApplianceEntry.jsx';
 import BudgetSetup from '../pages/user/dashboard/BudgetSetter.jsx';
 import UserProfile from '../pages/user/profile/UserProfile.jsx';
+import UserDashboard from '../pages/user/dashboard/Dashboard.jsx';
+import Navbar from './components/Navbar.jsx';
 
 // Placeholder components for dashboards
-const UserDashboard = () => <div>User Dashboard</div>;
+//const UserDashboard = () => <div>User Dashboard</div>;
 const AdminDashboard = () => <div>Admin Dashboard</div>;
 
 function App() {
   return (
+    
     <Router>
+      <Navbar /> 
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -24,6 +27,7 @@ function App() {
         <Route path="/appliancec-entry" element={<ApplianceEntry />} />
         <Route path="/budget-setup" element={<BudgetSetup />} />
         <Route path="/profile" element={<UserProfile />} />
+        <Route path="/dashboard" element={<UserDashboard />} />
         
         {/* Later, you will protect these routes */}
         <Route path="/dashboard" element={<UserDashboard />} />

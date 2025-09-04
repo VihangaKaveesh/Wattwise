@@ -187,3 +187,19 @@
     align-items: center;
   }
 }
+
+/* in a global CSS file or body override */
+body, html {
+  height: auto;          /* allow height to grow */
+  min-height: 100%;      /* at least viewport height */
+  overflow-y: auto;      /* vertical scrollbar when needed */
+}
+
+/* For main page containers */
+.dashboard-page,
+.profile-page,
+.appliance-entry-page,
+.questionnaire-page {
+  min-height: 100vh;     /* full viewport height */
+  overflow-y: auto;      /* enable scrolling */
+}

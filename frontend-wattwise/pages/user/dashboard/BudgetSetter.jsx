@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
-import { useLocation } from 'react-router-dom';
+import AuthContext from '../../../src/context/authcontext.jsx';
 import './styles/BudgetSetter.css';
 
 export default function BudgetSetup() {
-  const locationObj = useLocation();
-  const { userId, token } = locationObj.state || {};
+  const { user } = useContext(AuthContext); // get userId and token from context
 
   const [appliances, setAppliances] = useState([]);
   const [people, setPeople] = useState(1);
@@ -14,10 +13,15 @@ export default function BudgetSetup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const userId = user?.userId;
+  const token = user?.token;
+
   // Fetch user-specific appliances on mount
   useEffect(() => {
     const fetchAppliances = async () => {
       try {
+        if (!userId || !token) return;
+
         const res = await axios.get(`http://localhost:5000/api/user-appliances/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -30,7 +34,7 @@ export default function BudgetSetup() {
     fetchAppliances();
   }, [userId, token]);
 
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!budget || appliances.length === 0) return;
 
@@ -59,7 +63,6 @@ export default function BudgetSetup() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
 
     } catch (err) {
       console.error('Error fetching recommendations or saving:', err);

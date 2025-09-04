@@ -1,9 +1,8 @@
-// src/pages/auth/LoginPage.jsx
-
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { authService } from '../../services/authService';
-import './style/LoginPage.css'; 
+import React, { useState, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import AuthContext from "../../src/context/authcontext.jsx";
+import { authService } from "../../services/authService";
+import "./style/LoginPage.css";
 
 const EmailIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -18,38 +17,32 @@ const LockIcon = () => (
 );
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setError('');
+    e.preventDefault();
+    setError("");
 
-  try {
+    try {
+         // login returns an object { token, id, role }
     const userData = await authService.login(email, password);
-    if (!userData || !userData.token || !(userData.id || userData._id)) {
-      throw new Error('Invalid login response');
+    if (!userData || !userData.token) throw new Error("Login failed");
+
+    // Save JWT from the object
+    login(userData.token); // update context
+
+    // Decode JWT
+    const decoded = JSON.parse(atob(userData.token.split(".")[1]));
+      if (decoded.role === "admin") navigate("/admin/dashboard");
+      else navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Login failed");
     }
-
-    const userId = userData.id || userData._id; // ✅ support both
-
-    if (userData.role === 'admin') {
-      navigate('/admin/dashboard', { state: { userId, token: userData.token } });
-    } else {
-     navigate('/profile', { state: { userId: userData._id, token: userData.token } });
-    }
-
-  } catch (err) {
-    setError(err.message || 'Login failed');
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="login-page">
@@ -81,25 +74,16 @@ export default function LoginPage() {
               required
             />
           </div>
-          
+
           {error && <div className="error-message">{error}</div>}
 
-          <button
-            type="submit"
-            className={`submit-btn ${isLoading ? 'loading' : ''}`}
-            disabled={isLoading}
-          >
+          <button type="submit" className="submit-btn">
             <span className="btn-text">Sign In</span>
           </button>
         </form>
 
         <div className="login-footer">
-          <p>
-            No account?{' '}
-            <Link to="/register" className="create-account-link">
-              Create one
-            </Link>
-          </p>
+          <p>No account? <Link to="/register" className="create-account-link">Create one</Link></p>
         </div>
       </div>
     </div>

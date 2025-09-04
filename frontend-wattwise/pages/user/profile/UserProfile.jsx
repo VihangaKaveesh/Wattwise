@@ -1,46 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import AuthContext from '../../../src/context/authcontext.jsx';
 import './UserProfile.css';
 
 export default function UserProfile() {
-  const locationObj = useLocation();
+  const { user } = useContext(AuthContext); // Get JWT + userId from context
   const navigate = useNavigate();
-  const { userId, token } = locationObj.state || {};
 
   const [userData, setUserData] = useState(null);
   const [appliances, setAppliances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const userId = user?.userId;
+  const token = user?.token;
+
   // Fetch user profile + appliances
-useEffect(() => {
-  const fetchProfile = async () => {
-    try {
-      // 1️⃣ Fetch user info
-      const userRes = await axios.get(`http://localhost:5000/api/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log("User fetched:", userRes.data);
-      setUserData(userRes.data);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        if (!userId || !token) return;
 
-      // 2️⃣ Fetch user's appliances
-      const applianceRes = await axios.get(`http://localhost:5000/api/user-appliances/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log("Appliances fetched:", applianceRes.data);
-      setAppliances(applianceRes.data.appliances || []);
+        // 1️⃣ Fetch user info
+        const userRes = await axios.get(`http://localhost:5000/api/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("User fetched:", userRes.data);
+        setUserData(userRes.data);
 
-    } catch (err) {
-      console.error('Error fetching profile:', err.response?.data || err.message);
-      setError('Failed to fetch user profile or appliances.');
-    } finally {
-      setLoading(false);
-    }
-  };
+        // 2️⃣ Fetch user's appliances
+        const applianceRes = await axios.get(`http://localhost:5000/api/user-appliances/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("Appliances fetched:", applianceRes.data);
+        setAppliances(applianceRes.data.appliances || []);
 
-  if (userId) fetchProfile();
-}, [userId, token]);
+      } catch (err) {
+        console.error('Error fetching profile:', err.response?.data || err.message);
+        setError('Failed to fetch user profile or appliances.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [userId, token]);
 
   const handleDeleteAppliances = async () => {
     if (!window.confirm('Are you sure you want to delete all appliances?')) return;
@@ -57,7 +62,7 @@ useEffect(() => {
   };
 
   const handleAddAppliances = () => {
-    navigate('/appliancec-entry', { state: { userId: userData._id, token: userData.token } });
+    navigate('/appliancec-entry', { state: { userId, token } });
   };
 
   if (loading) return <div className="loading">Loading profile...</div>;
@@ -83,19 +88,19 @@ useEffect(() => {
           </div>
 
           <div className="appliances-grid">
-  {appliances.length > 0 ? (
-    appliances.map((app, idx) => (
-      <div key={idx} className="appliance-card">
-        <span>{app.name || "Unnamed Appliance"}</span>
-        {app.power && <small>{app.power} W</small>}
-        {app.location && <small>{app.location}</small>}
-      </div>
+            {appliances.length > 0 ? (
+              appliances.map((app, idx) => (
+                <div key={idx} className="appliance-card">
+                  <span>{app.name || "Unnamed Appliance"}</span>
+                  {app.power && <small>{app.power} W</small>}
+                  {app.location && <small>{app.location}</small>}
+                </div>
               ))
             ) : (
               <div className="no-appliances">
-      <p>No appliances added yet.</p>
-      <button className="add-btn" onClick={handleAddAppliances}>+ Add Appliance</button>
-    </div>
+                <p>No appliances added yet.</p>
+                <button className="add-btn" onClick={handleAddAppliances}>+ Add Appliance</button>
+              </div>
             )}
           </div>
         </div>

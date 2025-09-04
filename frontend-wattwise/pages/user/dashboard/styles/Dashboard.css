@@ -1,0 +1,115 @@
+/* Reset and full viewport */
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden; /* Remove scrollbars */
+}
+
+* {
+  box-sizing: inherit;
+}
+
+.dashboard-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 20px;
+  padding: 20px;
+  width: 100vw;
+  height: 100vh;
+  background: #f9fafb;
+}
+
+/* Grid placement */
+
+.prediction {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  background: #f3f4f6;
+  padding: 20px;
+  border-radius: 10px;
+  height: 100%;
+}
+
+.appliances {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  background: #fef9f0;
+  padding: 20px;
+  border-radius: 10px;
+  height: 100%;
+}
+
+.recommendation {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+  background: #e0f7fa;
+  padding: 20px;
+  border-radius: 10px;
+  height: 100%;
+}
+
+/* Cards */
+.appliance-cards, .recommendation-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.appliance-card, .recommendation-card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  flex: 1 1 100px;
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+/* Chart container fills full space */
+.chart-container {
+  width: 100%;      /* Full width of grid cell */
+  height: 100%;     /* Full height of grid cell */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* optional: center the chart vertically */
+}
+
+.dashboard-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 20px;
+  width: 100vw;
+  height: 100vh;
+  padding: 20px;
+}
+
+.chart {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+  height: 100%;  /* ensure parent has full height */
+}
+
+/* in a global CSS file or body override */
+body, html {
+  height: auto;          /* allow height to grow */
+  min-height: 100%;      /* at least viewport height */
+  overflow-y: auto;      /* vertical scrollbar when needed */
+}
+
+/* For main page containers */
+.dashboard-page,
+.profile-page,
+.appliance-entry-page,
+.questionnaire-page {
+  min-height: 100vh;     /* full viewport height */
+  overflow-y: auto;      /* enable scrolling */
+}
