@@ -36,7 +36,7 @@ export default function LoginPage() {
       await login(userData.token);
 
       // Navigate based on role
-      if (userData.role === "admin") navigate("/admin-dashboard");
+      if (userData.role === "admin") navigate("/admin/dashboard");
       else if (userData.role === "user") navigate("/dashboard");
       else setError("User role not recognized");
 

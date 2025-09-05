@@ -40,7 +40,9 @@ export default function ReportGenerator() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
     if (!user?.token) return;
+
 
     const fetchData = async () => {
       try {
@@ -128,7 +130,8 @@ export default function ReportGenerator() {
     });
   }, [selectedRegion, appliances, forecasts]);
 
-  if (loading) return <div className="loading">Loading report...</div>;
+
+   if (loading) return <div className="loading">Loading report...</div>;
 
   return (
     <div className="report-generator">
