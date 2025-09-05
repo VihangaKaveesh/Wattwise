@@ -28,17 +28,18 @@ export default function LoginPage() {
     setError("");
 
     try {
-         // login returns an object { token, id, role }
-    const userData = await authService.login(email, password);
-    if (!userData || !userData.token) throw new Error("Login failed");
+      // authService.login returns { token, role, id }
+      const userData = await authService.login(email, password);
+      if (!userData || !userData.token) throw new Error("Login failed");
 
-    // Save JWT from the object
-    login(userData.token); // update context
+      // Only pass the token string to login
+      await login(userData.token);
 
-    // Decode JWT
-    const decoded = JSON.parse(atob(userData.token.split(".")[1]));
-      if (decoded.role === "admin") navigate("/admin/dashboard");
-      else navigate("/dashboard");
+      // Navigate based on role
+      if (userData.role === "admin") navigate("/admin-dashboard");
+      else if (userData.role === "user") navigate("/dashboard");
+      else setError("User role not recognized");
+
     } catch (err) {
       setError(err.message || "Login failed");
     }

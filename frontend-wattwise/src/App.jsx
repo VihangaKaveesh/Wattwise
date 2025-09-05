@@ -9,10 +9,11 @@ import BudgetSetup from '../pages/user/dashboard/BudgetSetter.jsx';
 import UserProfile from '../pages/user/profile/UserProfile.jsx';
 import UserDashboard from '../pages/user/dashboard/Dashboard.jsx';
 import Navbar from './components/Navbar.jsx';
+import AdminDashboard from '../pages/admin/AdminDashboardPage.jsx';
 
 // Placeholder components for dashboards
 //const UserDashboard = () => <div>User Dashboard</div>;
-const AdminDashboard = () => <div>Admin Dashboard</div>;
+//const AdminDashboard = () => <div>Admin Dashboard</div>;
 
 function App() {
   return (
@@ -31,7 +32,7 @@ function App() {
         
         {/* Later, you will protect these routes */}
         <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         
         {/* Redirect any other path to the login page */}
         <Route path="*" element={<Navigate to="/login" />} />

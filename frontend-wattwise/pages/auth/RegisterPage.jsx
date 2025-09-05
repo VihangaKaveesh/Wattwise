@@ -49,7 +49,7 @@ export default function RegisterPage() {
 
         <form onSubmit={handleRegister} className="register-form">
           <div className="input-group">
-            <span className="icon"><UserIcon /></span>
+            {/* <span className="icon"><UserIcon /></span> */}
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name" required />
           </div>
 
