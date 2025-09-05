@@ -17,7 +17,7 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <div className="navbar-logo">MyEnergyApp</div>
+      <div className="navbar-logo">WattWise</div>
 
       <ul className="navbar-links">
         {user.role === "user" && (

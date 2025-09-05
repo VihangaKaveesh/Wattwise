@@ -10,6 +10,8 @@ import UserProfile from '../pages/user/profile/UserProfile.jsx';
 import UserDashboard from '../pages/user/dashboard/Dashboard.jsx';
 import Navbar from './components/Navbar.jsx';
 import AdminDashboard from '../pages/admin/AdminDashboardPage.jsx';
+import ReportGenerator from '../pages/admin/ReportGenerator.jsx';
+
 
 // Placeholder components for dashboards
 //const UserDashboard = () => <div>User Dashboard</div>;
@@ -29,12 +31,10 @@ function App() {
         <Route path="/budget-setup" element={<BudgetSetup />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/reports" element={<ReportGenerator/>} />
+
         
-        {/* Later, you will protect these routes */}
-        <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        
-        {/* Redirect any other path to the login page */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

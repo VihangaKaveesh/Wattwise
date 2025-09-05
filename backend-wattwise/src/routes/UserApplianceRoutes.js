@@ -41,7 +41,26 @@ router.post("/:userId", async (req, res) => {
 //     ]
 //   }'
 
+// GET all appliances for all users
+router.get("/user-appliances/", async (req, res) => {
+  try {
+    const records = await UserAppliance.find(); // get all user appliances
 
+    // Map to a cleaner format if needed
+    const appliances = records.map((record) => ({
+      userId: record.userId,
+      location: record.location || "Unknown",
+      appliances: record.appliances || [],
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    }));
+
+    res.json(appliances);
+  } catch (error) {
+    console.error("Error fetching all appliances:", error);
+    res.status(500).json({ error: "Failed to fetch appliances" });
+  }
+});
 
 
 // Get all appliances for a user
