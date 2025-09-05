@@ -46,7 +46,7 @@ export default function ReportGenerator() {
 
     const fetchData = async () => {
       try {
-        const applianceRes = await axios.get("http://localhost:5000/api/user-appliances", {
+        const applianceRes = await axios.get("http://localhost:5000/api/user-appliances/user-appliances", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
 
