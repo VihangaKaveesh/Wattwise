@@ -24,27 +24,29 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    try {
-      // authService.login returns { token, role, id }
-      const userData = await authService.login(email, password);
-      if (!userData || !userData.token) throw new Error("Login failed");
+  try {
+    // authService.login returns { token, role, id }
+    const userData = await authService.login(email, password);
+    if (!userData || !userData.token) throw new Error("Login failed");
 
-      // Only pass the token string to login
-      await login(userData.token);
+    // Only pass the token string to login
+    await login(userData.token);
 
-      // Navigate based on role
-      if (userData.role === "admin") navigate("/admin/dashboard");
-      else if (userData.role === "user") navigate("/dashboard");
-      else setError("User role not recognized");
+    // Alert for successful login
+    alert("Successfully logged in");
 
-    } catch (err) {
-      setError(err.message || "Login failed");
-    }
-  };
+    // Navigate based on role
+    if (userData.role === "admin") navigate("/admin/dashboard");
+    else if (userData.role === "user") navigate("/dashboard");
+    else setError("User role not recognized");
 
+  } catch (err) {
+    setError(err.message || "Login failed");
+  }
+};
   return (
     <div className="login-page">
       <div className="login-container">

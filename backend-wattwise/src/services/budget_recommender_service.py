@@ -6,17 +6,15 @@ import joblib
 import json
 from pathlib import Path
 
-# ---------------------------
+
 # Flask setup
-# ---------------------------
 app = Flask(__name__)
 CORS(app)
 
 BASE_DIR = Path(__file__).parent
 
-# ---------------------------
+
 # Load appliance data & default hours
-# ---------------------------
 APPLIANCE_CSV = './datasets/appliances_sl.csv'
 appliances_df = pd.read_csv(APPLIANCE_CSV)
 appl_table = appliances_df.set_index('appliance').to_dict(orient='index')
@@ -31,15 +29,13 @@ holidays_df = pd.read_csv('./datasets/holidays_2025_monthly.csv').set_index('mon
 
 FEATURE_COLS = ['people','num_appliances','physics_kwh','sum_monthly_hours_appliances','month','rainy_days','public_holidays']
 
-# ---------------------------
+
 # Load RF model (optional, you can skip this if using iterative approximation)
-# ---------------------------
 RF_MODEL_PATH ='./ml-models/rf_energy_model.pkl'
 rf_model = joblib.load(RF_MODEL_PATH)
 
-# ---------------------------
+
 # Helper functions
-# ---------------------------
 def build_feature(people, month, appliances, hours_per_day):
     monthly_power_time_wh = 0
     monthly_standby_wh = 0
@@ -102,9 +98,8 @@ def budget_optimizer_exact(people, month, appliances, budget_lkr, tol=1.0):
 
     return {app: round(h, 2) for app, h in recommended_hours.items()}
 
-# ---------------------------
+
 # Flask endpoint
-# ---------------------------
 @app.route('/recommend-budget', methods=['POST'])
 def recommend_budget():
     data = request.get_json()
@@ -122,8 +117,7 @@ def recommend_budget():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ---------------------------
+
 # Run server
-# ---------------------------
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

@@ -11,9 +11,13 @@ export default function Navbar() {
   if (!user) return null; 
 
   const handleLogout = () => {
+  // Show confirm dialog before logging out
+  if (window.confirm("Are you sure you want to logout?")) {
     logout();
     navigate("/login");
-  };
+    alert("Successfully logged out");
+  }
+};
 
   return (
     <nav className="navbar">

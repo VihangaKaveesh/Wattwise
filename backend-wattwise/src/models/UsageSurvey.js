@@ -13,4 +13,4 @@ const usageSurveySchema = new mongoose.Schema({
   submittedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-module.exports = mongoose.model("UsageSurvey", usageSurveySchema);
+module.exports = mongoose.model("UsageSurvey", usageSurveySchema);  

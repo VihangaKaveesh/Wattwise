@@ -19,25 +19,30 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-    setIsLoading(true);
-    setError('');
+ const handleRegister = async (e) => {
+  e.preventDefault();
+  if (password !== confirmPassword) {
+    setError("Passwords do not match");
+    return;
+  }
+  setIsLoading(true);
+  setError('');
 
-    try {
-      await authService.register(name, email, password);
-      // On successful registration, navigate to the user dashboard
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  try {
+    await authService.register(name, email, password);
+
+    // Alert for successful registration
+    alert("Successfully registered");
+
+    // On successful registration, navigate to the user dashboard
+    navigate('/dashboard');
+  } catch (err) {
+    setError(err);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="register-page">
